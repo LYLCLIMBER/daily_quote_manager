@@ -10,7 +10,6 @@
 - 一键启用或停用 Plasma 登录通知
 - 打开语录数据目录
 - 使用安全的临时文件替换方式保存语录
-- 首次运行时自动迁移旧版 `~/.local/share/quotes.txt`，不会删除原文件
 
 ## 依赖
 
@@ -78,28 +77,6 @@ python3 /home/liuyulong/Codes/daily-quote-manager/daily_quote_manager.py --notif
 python3 daily_quote_manager.py --notify
 ```
 
-## 数据迁移
-
-程序首次运行时，如果新的数据文件不存在而旧文件存在：
-
-```text
-~/.local/share/quotes.txt
-```
-
-程序会将旧文件复制到：
-
-```text
-~/.local/share/daily-quote/quotes.txt
-```
-
-原文件不会被删除，便于回滚。旧版的：
-
-```text
-~/.local/bin/daily-quote
-```
-
-不会被程序自动删除；确认新程序工作正常后，可以手动删除。
-
 ## 测试
 
 运行全部测试：
@@ -132,13 +109,6 @@ rm ~/.config/autostart/daily-quote.desktop
 
 ```bash
 rm -rf ~/.local/share/daily-quote
-```
-
-如果需要恢复旧版配置，原来的以下文件不会被程序自动删除：
-
-```text
-~/.local/share/quotes.txt
-~/.local/bin/daily-quote
 ```
 
 ## 项目结构

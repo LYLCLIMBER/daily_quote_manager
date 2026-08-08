@@ -7,7 +7,6 @@ import argparse
 import os
 import random
 import shlex
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -37,7 +36,6 @@ from PyQt6.QtWidgets import (
 APP_NAME = "每日名言"
 DEFAULT_DATA_DIR = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "daily-quote"
 DEFAULT_AUTOSTART = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "autostart" / "daily-quote.desktop"
-LEGACY_QUOTE_FILE = Path.home() / ".local/share/quotes.txt"
 
 
 class QuoteStore:
@@ -102,15 +100,6 @@ class Autostart:
 
     def disable(self) -> None:
         self.path.unlink(missing_ok=True)
-
-
-def migrate_legacy_data(store: QuoteStore) -> bool:
-    """Copy the old quote file once, without deleting the user's original."""
-    if store.path.exists() or not LEGACY_QUOTE_FILE.exists():
-        return False
-    store.path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(LEGACY_QUOTE_FILE, store.path)
-    return True
 
 
 def notify_from_store(store: QuoteStore, delay: float = 8) -> str | None:
@@ -296,7 +285,6 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     store = QuoteStore(DEFAULT_DATA_DIR / "quotes.txt")
-    migrate_legacy_data(store)
     autostart = Autostart()
 
     if args.notify:
