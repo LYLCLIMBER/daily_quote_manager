@@ -33,7 +33,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-APP_NAME = "每日名言"
+APP_NAME = "daily_quote_manager"
 DEFAULT_DATA_DIR = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "daily-quote"
 DEFAULT_AUTOSTART = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "autostart" / "daily-quote.desktop"
 
@@ -275,7 +275,7 @@ class MainWindow(QMainWindow):
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="每日名言管理器")
+    parser = argparse.ArgumentParser(description="daily_quote_manager")
     parser.add_argument("--notify", action="store_true", help="随机发送一条通知后退出")
     parser.add_argument("--enable-autostart", action="store_true", help="启用 Plasma 登录自动通知")
     parser.add_argument("--disable-autostart", action="store_true", help="停用 Plasma 登录自动通知")
