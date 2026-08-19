@@ -33,6 +33,33 @@ class QuoteStoreTests(unittest.TestCase):
             self.assertEqual(list(Path(tmp).glob("*.tmp")), [])
 
 
+class SettingsStoreTests(unittest.TestCase):
+    def test_load_returns_defaults_and_save_persists_settings(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = app.SettingsStore(Path(tmp) / "settings.json")
+            self.assertEqual(store.load(), {"periodic_enabled": False, "interval_minutes": 60})
+            store.save({"periodic_enabled": True, "interval_minutes": 15})
+            self.assertEqual(store.load(), {"periodic_enabled": True, "interval_minutes": 15})
+
+    def test_load_normalizes_invalid_interval(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "settings.json"
+            path.write_text('{"periodic_enabled": true, "interval_minutes": 0}', encoding="utf-8")
+            self.assertEqual(app.SettingsStore(path).load()["interval_minutes"], 1)
+
+    def test_load_parses_string_boolean_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "settings.json"
+            path.write_text('{"periodic_enabled": "false"}', encoding="utf-8")
+            self.assertFalse(app.SettingsStore(path).load()["periodic_enabled"])
+
+    def test_save_does_not_leave_temporary_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "settings.json"
+            app.SettingsStore(path).save({"periodic_enabled": True, "interval_minutes": 5})
+            self.assertEqual(list(Path(tmp).glob("*.tmp")), [])
+
+
 class NotificationTests(unittest.TestCase):
     @patch.object(app.time, "sleep")
     @patch.object(app.subprocess, "run")
@@ -47,6 +74,17 @@ class NotificationTests(unittest.TestCase):
             self.assertEqual(command[0], "/usr/bin/notify-send")
             self.assertIn("测试语录", command)
             self.assertFalse(run.call_args.kwargs["shell"])
+
+    @patch.object(app.time, "sleep", side_effect=[None, KeyboardInterrupt])
+    @patch.object(app, "notify_from_store")
+    def test_periodic_daemon_notifies_using_saved_interval(self, notify, sleep):
+        with tempfile.TemporaryDirectory() as tmp:
+            settings = app.SettingsStore(Path(tmp) / "settings.json")
+            settings.save({"periodic_enabled": True, "interval_minutes": 1})
+            with self.assertRaises(KeyboardInterrupt):
+                app.run_notification_daemon(app.QuoteStore(Path(tmp) / "quotes.txt"), settings)
+            self.assertEqual(notify.call_count, 2)
+            self.assertEqual(sleep.call_args_list[0].args, (60,))
 
 
 class AutostartTests(unittest.TestCase):

@@ -8,6 +8,8 @@ A small local KDE Plasma application for managing quotes and displaying a random
 - UTF-8 and Chinese text support
 - Random notification preview
 - Enable or disable Plasma login notifications with one click
+- Enable or disable periodic notifications and set the interval in minutes
+- Minimize to the system tray when the window is closed
 - Open the quote data directory
 - Save quotes safely using atomic temporary-file replacement
 
@@ -41,7 +43,9 @@ The application files are kept in the project directory, while user data and KDE
 
 ```text
 ~/.local/share/daily-quote/quotes.txt
+~/.local/share/daily-quote/settings.json
 ~/.config/autostart/daily-quote.desktop
+~/.config/autostart/daily-quote-periodic.desktop
 ```
 
 This is intentional: project code can be kept in a Git repository, while user data and desktop configuration follow the Linux/XDG directory conventions.
@@ -53,6 +57,13 @@ The quote file is a plain text file with one quote per line:
 ```
 
 Blank lines and lines beginning with `#` are ignored.
+
+The GUI's periodic notification setting is disabled by default. When enabled, a
+background notification process shows a random quote at the configured interval,
+even after the GUI is closed. The interval can be set from 1 to 1440 minutes.
+The periodic process is started automatically when Plasma logs in.
+Closing the GUI window hides it to the system tray; use the tray menu to show
+the window again or exit the manager.
 
 ## Enabling And Disabling Notifications
 
